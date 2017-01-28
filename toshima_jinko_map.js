@@ -6,19 +6,19 @@ function drawPie(data, choName) {
 	for (i in data) {
 		if (data[i]['町丁目'] === choName) {
 			pieData.push(data[i].rate_male, data[i].rate_female);
-			var g = svg.selectAll(".arc")
+			var g = svg.selectAll('.arc')
 				.data(pie(pieData))
-    			.enter().append("g")
-      			.attr("class", "arc")
-				.attr('transform', 'translate(500, ' + (height/8 + margin.top)*1.1 + ')');
+    			.enter().append('g')
+      			.attr('class', 'arc')
+				.attr('transform', 'translate(600, ' + (height/8 + margin.top)*1.1 + ')');
 
-			g.append("path")
-    			.attr("d", arc)
-    			.style("fill", function(d) { return color(d.data); });
+			g.append('path')
+    			.attr('d', arc)
+    			.style('fill', function(d) { return color(d.data); });
 
-			g.append("text")
-    			.attr("transform", function(d) { return "translate(" + labelArc.centroid(d) + ")"; })
-    			.attr("dy", ".35em")
+			g.append('text')
+    			.attr('transform', function(d) { return 'translate(' + labelArc.centroid(d) + ')'; })
+    			.attr('dy', '.35em')
 				.attr('dx', '-1em')
     			.text(function(d) { return Math.round(d.data) + '%'; })
     			.style('fill', 'white');
@@ -116,7 +116,9 @@ function scatter_change(choName) {
 function scatter_recover(choName) {
 	d3.selectAll('#s_' + choName)
 		.attr('r', 3.5)
-		.style('fill', 'steelblue');
+		.style('fill', function(d) {
+			return z(d.cat);
+		});
 };
 
 
@@ -137,13 +139,13 @@ var width = 1200 - margin.right - margin.left,
 // Define the scatter plot
 var x = d3.scaleLinear().range([0, width - 800]);
 var y = d3.scaleLinear().range([height - 200, 0]);
-
+var z = d3.scaleOrdinal(d3.schemeCategory10);
 
 // Definie the pie chart
 var radius = 80;
 
 var color = d3.scaleOrdinal()
-    .range(["#3182bd", "#e6550d"]);
+    .range(['#3182bd', '#bd313d']);
 
 var arc = d3.arc()
     .outerRadius(radius - 10)
@@ -165,6 +167,8 @@ var x_bar = d3.scaleLinear().range([0, 450]);
 //map
 var color_map = d3.scaleLinear()
 		.range(['#fafafa', 'steelblue']);
+
+var z_map = d3.scaleOrdinal(d3.schemeCategory10);
 
 
 // Append the svg
@@ -200,6 +204,7 @@ d3.csv('toshima_jinko_rate.csv', function(error, data) {
 			d.o65_f = +d['65歳以上_女'];
 			d.rate_old = +d['高齢化率'];
 			d.rate_young = +d['若者率'];
+			d.cat = +d['cat2'];
 			d.tot = d.u18_m + d.u18_f + d.a1839_m + d.a1839_f 
 					+ d.a4064_m + d.a4064_f + d.o65_m + d.o65_f;
 			d.rate_male = ((d.u18_m + d.a1839_m + d.a4064_m + d.o65_m) /
@@ -234,6 +239,7 @@ d3.csv('toshima_jinko_rate.csv', function(error, data) {
 			});
 		
 		// Add the barchart Xaxis
+		x_bar.domain([0, 3315])
 		svg.append('g')
 			.attr('transform', 'translate(0,' + height + ')')
 			.call(d3.axisBottom(x_bar))
@@ -290,7 +296,7 @@ d3.csv('toshima_jinko_rate.csv', function(error, data) {
 
 
 		// Drawing the scatter plot
-		svg.selectAll("dot")
+		svg.selectAll('dot')
 			.data(data)
 			.enter().append('circle')
 				.attr('id', function(d) {
@@ -303,8 +309,11 @@ d3.csv('toshima_jinko_rate.csv', function(error, data) {
 					return y(d.rate_young);
 				})
 				.attr('r', 3.5)
-				.style('fill', 'steelblue')
-				.on("mouseover", function(d) {
+				//.style('fill', 'steelblue')
+				.style('fill', function(d) {
+					return z(d.cat);
+				})
+				.on('mouseover', function(d) {
 					d3.select(this)
 						.transition().duration(100)
 						scatter_change(d.cho);
@@ -318,7 +327,7 @@ d3.csv('toshima_jinko_rate.csv', function(error, data) {
 				    div.html(d.cho 
                     + '<br>総人口:' + Math.round(d.tot) + '人'
                     + '<br>若者率:' + Math.round(d.rate_young*100) + '%')
-                    	.style('left', (d3.event.pageX) + "px")
+                    	.style('left', (d3.event.pageX) + 'px')
 						.style('top', (d3.event.pageY) + 'px');
 				})
 				.on('mouseout', function(d) {
@@ -362,7 +371,7 @@ d3.csv('toshima_jinko_rate.csv', function(error, data) {
 			.text('若者率');
 		
 		svg.append('text')
-			.attr('x', 500)
+			.attr('x', 600)
 			.attr('y', margin.top / 2)
 			.attr('text-anchor', 'middle')
 			.style('font-size', '16px')
@@ -394,13 +403,14 @@ d3.csv('toshima_jinko_rate.csv', function(error, data) {
 			.data(json.features)
 			.enter()
 			.append('path')
+			.attr('class', 'map_path')
 			.attr('d', path)
 			.attr('id', function(d) {
 				return d.properties.MOJI;
 			})
 			.style('stroke', '#AAA')
 			.style('stroke-width', '.25px')
-			.style("fill", function(d) {
+			.style('fill', function(d) {
 				var pop = [];
 				for (i in data) {
 					if (data[i]['町丁目'] === d.properties.MOJI) {
@@ -433,25 +443,27 @@ d3.csv('toshima_jinko_rate.csv', function(error, data) {
 				d3.selectAll('#bar_text').remove();
 			})
 
-		svg.selectAll(".place-label")
+		svg.selectAll('.place-label')
 			.data(json.features)
 			.enter()
-			.append("text")
-			.attr("font-size", "8px")
-			.attr("class", "place-label")
-			.attr("transform", function(d) {
+			.append('text')
+			.attr('font-size', '8px')
+			.attr('class', 'place-label')
+			.attr('transform', function(d) {
 				var lat = d.properties.Y_CODE;
 				var lng = d.properties.X_CODE;
-				return "translate(" + projection([lng, lat]) + ")";
+				return 'translate(' + projection([lng, lat]) + ')';
 			})
-			.attr("dx", "-1.5em")
+			.attr('dx', '-1.5em')
 			.text(function(d) { return d.properties.MOJI; });
 		
+
 		// Add legend
 
-		var legendView = svg.append("g")
-	  		.attr("class", "legendQuant")
-	  		.attr("transform", "translate(950,480)");	
+		// map
+		var legendView = svg.append('g')
+	  		.attr('class', 'legendQuant')
+	  		.attr('transform', 'translate(950,480)');	
 		
 		var legend = d3.legendColor()
 			.cells(5)	//表示するセルの数を指定
@@ -460,9 +472,205 @@ d3.csv('toshima_jinko_rate.csv', function(error, data) {
 			.scale(s); //凡例のスケールを指定		
 			
 			//凡例を描画する
-			legendView.call(legend);	
+			legendView.call(legend);
+		
+		
+		// scatter
+		//凡例を表示するグループ要素	
+		var legendLinear = svg.append('g')
+				.attr('class', 'legendLinear')
+				.attr('transform', 'translate(350,120)');
+ 
+		//スケールを元に凡例を生成する
+		var legendCat = d3.legendColor()
+			.shapeWidth(30)
+			.title('年代構成パターン')
+			.labels(['若者突出型', '中間型', '高齢型'])
+			.scale(z);
+   			
+			legendLinear.call(legendCat);
 
 
 
 	});
 });
+
+
+// 地図表示データを切り替え
+function updateData() {
+	//console.log(document.selectBox.dispData.value);
+
+	obj = document.selectBox.dispData.value;
+
+	d3.csv('toshima_jinko_rate.csv', function(error, data) {
+    	d3.json('toshima4326.json', function(error, json) {
+			if (error) throw console.log(error);
+
+		data.forEach(function(d) {
+			d.cho = d['町丁目'];
+			d.u18_m = +d['18歳未満_男'];
+			d.u18_f = +d['18歳未満_女'];
+			d.a1839_m = +d['18～39歳_男'];
+			d.a1839_f = +d['18～39歳_女'];		
+			d.a4064_m = +d['40～64歳_男'];		
+			d.a4064_f = +d['40～64歳_女'];		
+			d.o65_m = +d['65歳以上_男'];		
+			d.o65_f = +d['65歳以上_女'];
+			d.rate_old = +d['高齢化率'];		
+			d.rate_young = +d['若者率'];
+			d.cat = +d['cat2'];
+			d.a1839 = d.a1839_m + d.a1839_f;
+			d.a4064 = d.a4064_m + d.a4064_f;
+			d.o65 = d.o65_m + d.o65_f;
+
+			d.tot = d.u18_m + d.u18_f + d.a1839_m + d.a1839_f 
+					+ d.a4064_m + d.a4064_f + d.o65_m + d.o65_f;
+			d.rate_male = ((d.u18_m + d.a1839_m + d.a4064_m + d.o65_m) /
+							d.tot) * 100;
+			d.rate_female = ((d.u18_f + d.a1839_f + d.a4064_f + d.o65_f) /
+							d.tot) * 100;
+		});
+		switch (obj) {
+			case '1':
+				d3.selectAll('.map_path')
+					.style('fill', function(d) {
+						for (i in data) {
+							if (data[i]['町丁目'] === d.properties.MOJI) {
+								return z(data[i].cat);
+							}
+			}});			
+				d3.selectAll('.legendQuant').remove();
+				var legendView = svg.append('g')
+					.attr('class', 'legendQuant')
+					.attr('transform', 'translate(950,480)');	
+				
+				var legend = d3.legendColor()
+					.shapeWidth(30)
+					.title('年代構成パターン')
+					.labels(['若者突出型', '中間型', '高齢型'])
+					.scale(z);
+   							
+				legendView.call(legend);
+			break;
+			case '2':
+				var jmax = d3.max(data, function(d) {
+				return d.tot;
+				});
+				var jmin = d3.min(data, function(d) {
+				return d.tot;
+				});
+
+				s = color_map.domain([jmin, jmax]);
+
+				d3.selectAll('.map_path')
+				.style('fill', function(d) {
+					for (i in data) {
+						if (data[i]['町丁目'] === d.properties.MOJI) {
+								return s(data[i].tot);
+				}}});
+				d3.selectAll('.legendQuant').remove();
+				var legendView = svg.append('g')
+					.attr('class', 'legendQuant')
+					.attr('transform', 'translate(950,480)');	
+				
+				var legend = d3.legendColor()
+					.cells(5)	//表示するセルの数を指定
+					.title('町丁目別総人口')
+					.shapeWidth(30) //各セルの横幅を指定する
+					.scale(s); //凡例のスケールを指定		
+					
+				legendView.call(legend);
+				break;
+
+			case '3':
+				var jmax = d3.max(data, function(d) {
+					return d.a1839;
+				});
+				var jmin = d3.min(data, function(d) {
+					return d.a1839;
+				});
+				s = color_map.domain([jmin, jmax]);
+
+
+				d3.selectAll('.map_path')
+				.style('fill', function(d) {
+					for (i in data) {
+						if (data[i]['町丁目'] === d.properties.MOJI) {
+								return s(data[i].a1839);
+				}}});
+				d3.selectAll('.legendQuant').remove();
+				var legendView = svg.append('g')
+					.attr('class', 'legendQuant')
+					.attr('transform', 'translate(950,480)');	
+				
+				var legend = d3.legendColor()
+					.cells(5)	//表示するセルの数を指定
+					.title('町丁目別総人口')
+					.shapeWidth(30) //各セルの横幅を指定する
+					.scale(s); //凡例のスケールを指定		
+					
+				legendView.call(legend);
+				break;
+			case '4':
+				var jmax = d3.max(data, function(d) {
+					return d.a4064;
+				});
+				var jmin = d3.min(data, function(d) {
+					return d.a4064;
+				});
+				s = color_map.domain([jmin, jmax]);
+
+
+				d3.selectAll('.map_path')
+				.style('fill', function(d) {
+					for (i in data) {
+						if (data[i]['町丁目'] === d.properties.MOJI) {
+								return s(data[i].a4064);
+				}}})
+				d3.selectAll('.legendQuant').remove();
+				var legendView = svg.append('g')
+					.attr('class', 'legendQuant')
+					.attr('transform', 'translate(950,480)');	
+				
+				var legend = d3.legendColor()
+					.cells(5)	//表示するセルの数を指定
+					.title('町丁目別総人口')
+					.shapeWidth(30) //各セルの横幅を指定する
+					.scale(s); //凡例のスケールを指定		
+					
+				legendView.call(legend);
+				break;
+			case '5':
+				var jmax = d3.max(data, function(d) {
+					return d.o65;
+				});
+				var jmin = d3.min(data, function(d) {
+					return d.o65;
+				});
+				s = color_map.domain([jmin, jmax]);
+
+
+				d3.selectAll('.map_path')
+				.style('fill', function(d) {
+					for (i in data) {
+						if (data[i]['町丁目'] === d.properties.MOJI) {
+								return s(data[i].o65);
+				}}})
+				d3.selectAll('.legendQuant').remove();
+				var legendView = svg.append('g')
+					.attr('class', 'legendQuant')
+					.attr('transform', 'translate(950,480)');	
+				
+				var legend = d3.legendColor()
+					.cells(5)	//表示するセルの数を指定
+					.title('町丁目別総人口')
+					.shapeWidth(30) //各セルの横幅を指定する
+					.scale(s); //凡例のスケールを指定		
+					
+				legendView.call(legend);
+				break;
+		
+		};
+		});
+	});			
+};

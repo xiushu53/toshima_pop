@@ -3,9 +3,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width" />
 
-<link rel="stylesheet" type="text/css" href="css/toshima_jinko.css">
+<link rel="stylesheet" type="text/css" href="toshima_jinko.css">
 
 <body>
+<div id="option" align="right" style="margin-right:150px">
+	<form name="selectBox"> <p>表示データ選択</p>
+		<select name="dispData" onchange="updateData()">
+			<option value="1">構成型別</option>
+			<option selected value="2">総人口</option>
+			<option value="3">18-39歳</option>
+			<option value="4">40-64歳</option>
+			<option value="5">65歳以上</option>
+		</select>
+	</form> 
+</div>
+
 	<script type="text/javascript" src='https://d3js.org/d3.v4.min.js'></script>
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.21.0/d3-legend.js'></script>
 	<script src='toshima_jinko_map.js'></script>
