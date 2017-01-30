@@ -1,3 +1,4 @@
+
 // function
 
 //Drawing the piechat
@@ -175,8 +176,10 @@ var z_map = d3.scaleOrdinal(d3.schemeCategory10);
 var svg = d3.select('body').append('svg')
 		.attr('width', width + margin.left + margin.right)
 		.attr('height', height + margin.top + margin.bottom)
-	.append('g')
+		.append('g')
 		.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+
 
 // tooltips
 var div = d3.select('body').append('div')
@@ -237,13 +240,9 @@ d3.csv('toshima_jinko_rate.csv', function(error, data) {
 			.text(function(d) {
 				return d.name;
 			});
-		
+	
 		// Add the barchart Xaxis
-		x_bar.domain([0, 3315])
-		svg.append('g')
-			.attr('transform', 'translate(0,' + height + ')')
-			.call(d3.axisBottom(x_bar))
-			.attr('id', 'bar_axis');
+		x_bar.domain([0, 3315]) 
 
 
 
@@ -343,16 +342,7 @@ d3.csv('toshima_jinko_rate.csv', function(error, data) {
 						.style('opacity', 0);
 				});
 
-    
-		svg.append('g')
-			.attr('transform', 'translate(0,' + (height - 200) + ')') // 軸の位置
-			.call(d3.axisBottom(x)
-					.ticks(10)
-					); // 目盛りの位置
-		
-		svg.append('g')
-			.call(d3.axisLeft(y));
-		
+    		
 		// label for X axis
 		svg.append('text')
 			.attr('x', (width - 800) / 2)
@@ -456,7 +446,28 @@ d3.csv('toshima_jinko_rate.csv', function(error, data) {
 			})
 			.attr('dx', '-1.5em')
 			.text(function(d) { return d.properties.MOJI; });
+
+
+		// Add Axis
+
+		// barchart axis
+		svg.append('g') 
+			.attr('transform', 'translate(0,' + height + ')')
+			.call(d3.axisBottom(x_bar))
+			.attr('id', 'bar_axis');
 		
+		// scatter plot Xaxis
+		svg.append('g') 
+			.attr('transform', 'translate(0,' + (height - 200) + ')') // 軸の位置
+			.call(d3.axisBottom(x)
+					.ticks(10)
+					); // 目盛りの位置
+		
+		//scatter plot Yaxis
+		svg.append('g') 
+			.call(d3.axisLeft(y));
+
+
 
 		// Add legend
 
@@ -489,7 +500,7 @@ d3.csv('toshima_jinko_rate.csv', function(error, data) {
 			.scale(z);
    			
 			legendLinear.call(legendCat);
-
+		
 
 
 	});
